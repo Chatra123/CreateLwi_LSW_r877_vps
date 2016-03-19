@@ -1,0 +1,24 @@
+## based on LSW r877
+
+
+### CreateLwi.c
+
+lwlibav_source.cから
+  - #include
+  - vs_lwlibavsource_create(...)
+  - struct lwlibav_handler_t;
+  - static void free_handler(...)  
+を抽出
+
+commandline処理は未実装
+
+
+### lwindex.c
+変更なし（未実装）
+
+### lwindex.h
+変更なし（未実装）
+
+
+### その他のファイル
+変更なし

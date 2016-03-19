@@ -1,0 +1,9 @@
+eclipse.preferences.version=1
+environment/project/cdt.managedbuild.toolchain.gnu.mingw.base.50383551/MINGW_HOME/delimiter=;
+environment/project/cdt.managedbuild.toolchain.gnu.mingw.base.50383551/MINGW_HOME/operation=replace
+environment/project/cdt.managedbuild.toolchain.gnu.mingw.base.50383551/MINGW_HOME/value=D\:\\lsw-build2-master\\msys64\\mingw32
+environment/project/cdt.managedbuild.toolchain.gnu.mingw.base.50383551/MSYS_HOME/delimiter=;
+environment/project/cdt.managedbuild.toolchain.gnu.mingw.base.50383551/MSYS_HOME/operation=replace
+environment/project/cdt.managedbuild.toolchain.gnu.mingw.base.50383551/MSYS_HOME/value=D\:\\lsw-build2-master\\msys64\\usr
+environment/project/cdt.managedbuild.toolchain.gnu.mingw.base.50383551/append=true
+environment/project/cdt.managedbuild.toolchain.gnu.mingw.base.50383551/appendContributed=true
