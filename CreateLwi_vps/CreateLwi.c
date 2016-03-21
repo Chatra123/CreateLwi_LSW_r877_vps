@@ -1,8 +1,6 @@
 
 
 
-
-
 /* This file is available under an ISC license.
  * However, when distributing its binary file, it will be under LGPL or GPL. */
 
@@ -120,7 +118,8 @@ static lwlibav_handler_t *alloc_handler
 //    free_handler( (lwlibav_handler_t **)&instance_data );
 //}
 
-void VS_CC vs_lwlibavsource_create_crlwi( const VSMap *in, VSMap *out, void *user_data, VSCore *core, const VSAPI *vsapi )
+int VS_CC vs_lwlibavsource_create_crlwi( const VSMap *in, VSMap *out, void *user_data, VSCore *core, const VSAPI *vsapi,
+                                         crlwi_setting_handler__CrLwi *clshp)
 {
     /* Get file path. */
 //    const char *file_path = vsapi->propGetData( in, "source", 0, NULL );
@@ -134,7 +133,7 @@ void VS_CC vs_lwlibavsource_create_crlwi( const VSMap *in, VSMap *out, void *use
     if( !hp )
     {
 //        vsapi->setError( out, "lsmas: failed to allocate the LW-Libav handler." );
-        return;
+        return 2;
     }
     lwlibav_file_handler_t         *lwhp = &hp->lwh;
     lwlibav_video_decode_handler_t *vdhp = hp->vdhp;
@@ -209,8 +208,6 @@ void VS_CC vs_lwlibavsource_create_crlwi( const VSMap *in, VSMap *out, void *use
     /* Set options. */
     lwlibav_option_t opt;
     opt.file_path         = "";
-//    opt.file_path         = "none";
-//    opt.file_path         = "E://TS_Samp//ac2s.ts";
     opt.threads           = 0;
     opt.av_sync           = 0;
     opt.no_create_index   = 0;
@@ -225,7 +222,6 @@ void VS_CC vs_lwlibavsource_create_crlwi( const VSMap *in, VSMap *out, void *use
     opt.vfr2cfr.fps_den   = 1;
 
 
-
 //    lwlibav_video_set_seek_mode              ( vdhp, CLIP_VALUE( seek_mode,      0, 2 ) );
 //    lwlibav_video_set_forward_seek_threshold ( vdhp, CLIP_VALUE( seek_threshold, 1, 999 ) );
 //    lwlibav_video_set_preferred_decoder_names( vdhp, tokenize_preferred_decoder_names( hp->preferred_decoder_names_buf ) );
@@ -238,14 +234,14 @@ void VS_CC vs_lwlibavsource_create_crlwi( const VSMap *in, VSMap *out, void *use
     indicator.update = NULL;
     indicator.close  = NULL;
     /* Construct index. */
-    int ret = lwlibav_construct_index( lwhp, vdhp, vohp, hp->adhp, hp->aohp, &lh, &opt, &indicator, NULL );
+    int ret = lwlibav_construct_index__CrLwi( lwhp, vdhp, vohp, hp->adhp, hp->aohp, &lh, &opt, &indicator, NULL, clshp);
     lwlibav_audio_free_decode_handler_ptr( &hp->adhp );
     lwlibav_audio_free_output_handler_ptr( &hp->aohp );
     if( ret < 0 )
     {
 //        vs_filter_free( hp, core, vsapi );
 //        set_error_on_init( out, vsapi, "lsmas: failed to construct index." );
-        return;
+        return 2;
     }
 //    /* Get the desired video track. */
 //    lwlibav_video_set_log_handler( vdhp, &lh );
@@ -266,20 +262,98 @@ void VS_CC vs_lwlibavsource_create_crlwi( const VSMap *in, VSMap *out, void *use
 //        return;
 //    }
 //    vsapi->createFilter( in, out, "LWLibavSource", vs_filter_init, vs_filter_get_frame, vs_filter_free, fmSerial, 0, hp, core );
+
+    return 0;
 }
 
 
+//-----------------------------------------------------------------------------
+//↑ lwlibav_source.c  ここまで
+//-----------------------------------------------------------------------------
 
 
+void CommandLineParse(int argc, char** argv,
+                      crlwi_setting_handler__CrLwi *clshp)
+{
+  char filepath[_MAX_PATH] = {0};
+  char lwipath[_MAX_PATH] = {0};
+  char filepath_innerlwi[_MAX_PATH] = {0};
+  bool mode_PipeInput = false;
+  bool filename_innerlwi = false;
+  bool create_footer = false;
+  double readlimit_MiBsec = 0.0;
 
+
+  //parse
+  {
+    sprintf(filepath, "%s", "E://Test_lwi//ac2s.ts");
+    sprintf(lwipath, "%s", "");
+    sprintf(filepath_innerlwi, "%s", "");
+    mode_PipeInput = false;
+    filename_innerlwi = false;
+    create_footer = false;
+    readlimit_MiBsec = 0.0;
+  }
+
+
+  //post parse
+  {
+    //lwi index
+    //  lwipathの指定なし？  filepathからlwipath作成
+    if (_stricmp(lwipath, "") == 0)
+      sprintf(lwipath, "%s.lwi", filepath);
+
+    //  拡張子.lwiがなければ付与
+    char ext[_MAX_EXT];
+    _splitpath(lwipath, NULL, NULL, NULL, ext);
+    if (_stricmp(ext, ".lwi") != 0)
+    {
+      char lwipath_tmp[1024];
+      sprintf(lwipath_tmp, "%s.lwi", lwipath);
+      sprintf(lwipath, "%s", lwipath_tmp);
+    }
+
+    //lwi内に書き込むfilepath
+    if (filename_innerlwi)
+    {
+      //fullpath  →  filename
+      char name[_MAX_PATH], ext[_MAX_EXT];
+      _splitpath(filepath, NULL, NULL, name, ext);
+      sprintf(filepath_innerlwi, "%s%s", name, ext);
+    }
+    else//fullpath
+      sprintf(filepath_innerlwi, "%s", filepath);
+  }
+
+  //parser result
+  {
+    memset(clshp->filepath, 0,  _MAX_PATH);
+    memset(clshp->lwipath, 0,  _MAX_PATH);
+    memset(clshp->filepath_innerlwi, 0,  _MAX_PATH);
+    sprintf(clshp->filepath, "%s", filepath);
+    sprintf(clshp->lwipath, "%s", lwipath);
+    sprintf(clshp->filepath_innerlwi, "%s", filepath_innerlwi);
+    clshp->mode_PipeInput = mode_PipeInput;
+    clshp->create_footer = mode_PipeInput && create_footer;
+    clshp->readlimit_MiBsec = readlimit_MiBsec;
+  }
+}
+
+
+/*
+ * lwindex.c
+ *   line 3170    static void create_index__crlwi
+ *
+ *
+ * */
 
 int main(int argc, char** argv)
 {
-	int a = 0;
-	a = a + 10;
+  crlwi_setting_handler__CrLwi clshp;
+	CommandLineParse(argc, argv, &clshp);
 
-//	vs_lwlibavsource_create_crlwi( NULL, NULL, NULL, NULL, NULL);
+	int ret_code = vs_lwlibavsource_create_crlwi( NULL, NULL, NULL, NULL, NULL, &clshp);
 
-	return 0;
+	return ret_code;
 }
 

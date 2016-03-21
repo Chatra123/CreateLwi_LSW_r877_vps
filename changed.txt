@@ -2,23 +2,34 @@
 
 
 ### CreateLwi.c
-
 lwlibav_source.cから
   - #include
   - vs_lwlibavsource_create(...)
   - struct lwlibav_handler_t;
   - static void free_handler(...)  
-を抽出
+を抽出、追加
 
-commandline処理は未実装
+commandline処理  未実装
 
 
 ### lwindex.c
-変更なし（未実装）
+  line.3175
+  - static void create_index__CrLwi(...)  未実装
+  - int lwlibav_construct_index__CrLwi(...)
+追加
+
 
 ### lwindex.h
-変更なし（未実装）
-
+  - struct crlwi_setting_handler__CrLwi;
+  - int lwlibav_construct_index__CrLwi(...)
+追加
+  
 
 ### その他のファイル
 変更なし
+
+
+
+
+
+

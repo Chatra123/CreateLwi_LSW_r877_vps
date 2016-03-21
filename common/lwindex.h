@@ -59,3 +59,52 @@ int lwlibav_import_av_index_entry
 (
     lwlibav_decode_handler_t *dhp
 );
+
+
+
+
+
+
+
+
+
+
+
+
+//-----------------------------------------------------------------
+// ◇ CreateLwi
+//-----------------------------------------------------------------
+#include <stdbool.h>
+
+
+typedef struct
+{
+  char    filepath[_MAX_PATH];
+  char    lwipath[_MAX_PATH];
+  char    filepath_innerlwi[_MAX_PATH];
+  bool    mode_PipeInput;
+  bool    create_footer;
+  double  readlimit_MiBsec;
+} crlwi_setting_handler__CrLwi;
+
+
+
+int lwlibav_construct_index__CrLwi
+(
+    lwlibav_file_handler_t         *lwhp,
+    lwlibav_video_decode_handler_t *vdhp,
+    lwlibav_video_output_handler_t *vohp,
+    lwlibav_audio_decode_handler_t *adhp,
+    lwlibav_audio_output_handler_t *aohp,
+    lw_log_handler_t               *lhp,
+    lwlibav_option_t               *opt,
+    progress_indicator_t           *indicator,
+    progress_handler_t             *php,
+    crlwi_setting_handler__CrLwi   *clshp
+);
+
+
+
+
+
+
