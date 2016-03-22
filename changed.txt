@@ -1,4 +1,4 @@
-## based on LSW r877
+## based on LSW r877 VapourSynth
 
 
 ### CreateLwi.c
@@ -9,12 +9,12 @@ lwlibav_source.cから
   - static void free_handler(...)  
 を抽出、追加
 
-commandline処理  未実装
+commandline処理 
 
 
 ### lwindex.c
-  line.3175
-  - static void create_index__CrLwi(...)  未実装
+  line.3200
+  - static void create_index__CrLwi(...)
   - int lwlibav_construct_index__CrLwi(...)
 追加
 
