@@ -1,7 +1,7 @@
 ## based on LSW r877 VapourSynth
 
 
-### CreateLwi.c
+### CreateLwi_vps/CreateLwi.c
 lwlibav_source.cから
   - #include
   - vs_lwlibavsource_create(...)
@@ -12,14 +12,14 @@ lwlibav_source.cから
 commandline処理 
 
 
-### lwindex.c
+### common/lwindex.c
   line.3200
   - static void create_index__CrLwi(...)
   - int lwlibav_construct_index__CrLwi(...)
 追加
 
 
-### lwindex.h
+### common/lwindex.h
   - struct crlwi_setting_handler__CrLwi;
   - int lwlibav_construct_index__CrLwi(...)
 追加
