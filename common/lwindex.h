@@ -70,21 +70,19 @@ int lwlibav_import_av_index_entry
 
 
 
-
-//-----------------------------------------------------------------
-// ◇ CreateLwi
-//-----------------------------------------------------------------
+//==================================
+// CreateLwi
+//==================================
 #include <stdbool.h>
-
 
 typedef struct
 {
-  char    filepath[_MAX_PATH];
-  char    lwipath[_MAX_PATH];
-  char    filepath_innerlwi[_MAX_PATH];
-  bool    mode_PipeInput;
+  char    file_path[_MAX_PATH];
+  char    lwi_path[_MAX_PATH];
+  char    file_path_inner_lwi[_MAX_PATH];
+  bool    mode_pipe_input;
   bool    create_footer;
-  double  readlimit_MiBsec;
+  double  read_limit_MiBsec;
 } crlwi_setting_handler__CrLwi;
 
 

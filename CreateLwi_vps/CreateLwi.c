@@ -97,7 +97,7 @@ static lwlibav_handler_t *alloc_handler
     void
 )
 {
-    lwlibav_handler_t *hp = lw_malloc_zero( sizeof(lwlibav_handler_t) );
+    lwlibav_handler_t *hp = (lwlibav_handler_t*)lw_malloc_zero( sizeof(lwlibav_handler_t) );
     if( !hp )
         return NULL;
     if( !(hp->vdhp = lwlibav_video_alloc_decode_handler())
@@ -133,7 +133,7 @@ int VS_CC vs_lwlibavsource_create_crlwi( const VSMap *in, VSMap *out, void *user
     if( !hp )
     {
 //        vsapi->setError( out, "lsmas: failed to allocate the LW-Libav handler." );
-        return 2;
+        return 1;
     }
     lwlibav_file_handler_t         *lwhp = &hp->lwh;
     lwlibav_video_decode_handler_t *vdhp = hp->vdhp;
@@ -211,8 +211,8 @@ int VS_CC vs_lwlibavsource_create_crlwi( const VSMap *in, VSMap *out, void *user
     opt.threads           = 0;
     opt.av_sync           = 0;
     opt.no_create_index   = 0;
-    opt.force_video       = -1;
-    opt.force_video_index = -1;
+    opt.force_video       = 0;
+    opt.force_video_index = 0;
     opt.force_audio       = 0;
     opt.force_audio_index = -1;
     opt.apply_repeat_flag = 1;
@@ -241,7 +241,7 @@ int VS_CC vs_lwlibavsource_create_crlwi( const VSMap *in, VSMap *out, void *user
     {
 //        vs_filter_free( hp, core, vsapi );
 //        set_error_on_init( out, vsapi, "lsmas: failed to construct index." );
-        return 2;
+        return 1;
     }
 //    /* Get the desired video track. */
 //    lwlibav_video_set_log_handler( vdhp, &lh );
@@ -268,89 +268,150 @@ int VS_CC vs_lwlibavsource_create_crlwi( const VSMap *in, VSMap *out, void *user
 
 
 //-----------------------------------------------------------------------------
-//↑ lwlibav_source.c  ここまで
+//�� lwlibav_source.c is above
 //-----------------------------------------------------------------------------
 
 
-void CommandLineParse(int argc, char** argv,
+void ParseCommandLine(int argc, char** argv,
                       crlwi_setting_handler__CrLwi *clshp)
 {
-  char filepath[_MAX_PATH] = {0};
-  char lwipath[_MAX_PATH] = {0};
-  char filepath_innerlwi[_MAX_PATH] = {0};
-  bool mode_PipeInput = false;
-  bool filename_innerlwi = false;
+  char file_path[_MAX_PATH] = {0};
+  char lwi_path[_MAX_PATH] = {0};
+  char file_path_inner_lwi[_MAX_PATH] = {0};
+  bool mode_pipe_input = false;
+  bool is_filename_inner_lwi = false;
   bool create_footer = false;
-  double readlimit_MiBsec = 0.0;
+  double read_limit_MiBsec = 0.0;
 
 
-  //parse
+  //parser
+  for (size_t i = 1; i < argc; i++)
   {
-    sprintf(filepath, "%s", "E://Test_lwi//ac2s.ts");
-    sprintf(lwipath, "%s", "");
-    sprintf(filepath_innerlwi, "%s", "");
-    mode_PipeInput = false;
-    filename_innerlwi = false;
-    create_footer = false;
-    readlimit_MiBsec = 0.0;
+    //Is argv[1] filepath ?
+    if (i == 1)
+    {
+      FILE *fp = fopen(argv[1], "r");
+      if (fp != NULL)
+      {
+        mode_pipe_input = false;
+        sprintf(file_path, "%s", argv[i]);
+        fclose(fp);
+      }
+    }
+
+    //-file
+    if (_stricmp(argv[i], "-file") == 0)
+    {
+      mode_pipe_input = false;
+      if (i + 1 < argc)
+        sprintf(file_path, "%s", argv[i + 1]);
+    }
+    //-pipe
+    else if (_stricmp(argv[i], "-pipe") == 0)
+    {
+      mode_pipe_input = true;
+      if (i + 1 < argc)
+        sprintf(file_path, "%s", argv[i + 1]);
+    }
+    //-lwi
+    else if (_stricmp(argv[i], "-lwi") == 0)
+    {
+      if (i + 1 < argc)
+        sprintf(lwi_path, "%s", argv[i + 1]);
+    }
+    //-footer
+    else if (_stricmp(argv[i], "-footer") == 0)
+    {
+      create_footer = true;
+    }
+    //-ref_filename
+    else if (_stricmp(argv[i], "-ref_filename") == 0)
+    {
+      is_filename_inner_lwi = true;
+    }
+    //-limit
+    else if (_stricmp(argv[i], "-limit") == 0)
+    {
+      if (i + 1 < argc)
+        if ((_snscanf(argv[i + 1], 6, "%lf", &read_limit_MiBsec)) <= 0)
+          read_limit_MiBsec = 0;
+    }
   }
 
 
-  //post parse
-  {
-    //lwi index
-    //  lwipathの指定なし？  filepathからlwipath作成
-    if (_stricmp(lwipath, "") == 0)
-      sprintf(lwipath, "%s.lwi", filepath);
 
-    //  拡張子.lwiがなければ付与
+  //parser post process
+  {
+    //create lwipath from filepath
+    if (_stricmp(lwi_path, "") == 0)
+      sprintf(lwi_path, "%s.lwi", file_path);
+
+    //append .lwi extension
     char ext[_MAX_EXT];
-    _splitpath(lwipath, NULL, NULL, NULL, ext);
+    _splitpath(lwi_path, NULL, NULL, NULL, ext);
     if (_stricmp(ext, ".lwi") != 0)
     {
-      char lwipath_tmp[1024];
-      sprintf(lwipath_tmp, "%s.lwi", lwipath);
-      sprintf(lwipath, "%s", lwipath_tmp);
+      char tmp[_MAX_PATH] = {0};
+      sprintf(tmp, "%s.lwi", lwi_path);
+      sprintf(lwi_path, "%s", tmp);
     }
 
-    //lwi内に書き込むfilepath
-    if (filename_innerlwi)
+    if (is_filename_inner_lwi)
     {
-      //fullpath  →  filename
+      //fullpath  ��  filename
       char name[_MAX_PATH], ext[_MAX_EXT];
-      _splitpath(filepath, NULL, NULL, name, ext);
-      sprintf(filepath_innerlwi, "%s%s", name, ext);
+      _splitpath(file_path, NULL, NULL, name, ext);
+      sprintf(file_path_inner_lwi, "%s%s", name, ext);
     }
-    else//fullpath
-      sprintf(filepath_innerlwi, "%s", filepath);
+    else
+      sprintf(file_path_inner_lwi, "%s", file_path);
   }
 
-  //parser result
+  //parse result
   {
-    memset(clshp->filepath, 0,  _MAX_PATH);
-    memset(clshp->lwipath, 0,  _MAX_PATH);
-    memset(clshp->filepath_innerlwi, 0,  _MAX_PATH);
-    sprintf(clshp->filepath, "%s", filepath);
-    sprintf(clshp->lwipath, "%s", lwipath);
-    sprintf(clshp->filepath_innerlwi, "%s", filepath_innerlwi);
-    clshp->mode_PipeInput = mode_PipeInput;
-    clshp->create_footer = mode_PipeInput && create_footer;
-    clshp->readlimit_MiBsec = readlimit_MiBsec;
+    memset(clshp->file_path, 0, _MAX_PATH);
+    memset(clshp->lwi_path, 0, _MAX_PATH);
+    memset(clshp->file_path_inner_lwi, 0, _MAX_PATH);
+    sprintf(clshp->file_path, "%s", file_path);
+    sprintf(clshp->lwi_path, "%s", lwi_path);
+    sprintf(clshp->file_path_inner_lwi, "%s", file_path_inner_lwi);
+    clshp->mode_pipe_input = mode_pipe_input;
+    clshp->create_footer = mode_pipe_input && create_footer;
+    clshp->read_limit_MiBsec = read_limit_MiBsec;
   }
 }
 
 
 /*
  * lwindex.c
- *   line 3170    static void create_index__crlwi
+ *   line 3200    static void create_index__crlwi(...)
  *
  *
- * */
-
+ *
+*/
 int main(int argc, char** argv)
 {
+// test args
+//  char *test_argv[16];
+//  test_argv[0] = "app_path";
+//  test_argv[1] = "-file";
+//  test_argv[2] = "E:/Test_lwi/a13m.ts";
+//  argv = test_argv;
+//  argc = 3;
+
+
   crlwi_setting_handler__CrLwi clshp;
-	CommandLineParse(argc, argv, &clshp);
+  ParseCommandLine(argc, argv, &clshp);
+
+  //check file existance
+  if (clshp.mode_pipe_input == false)
+  {
+    FILE *fp = fopen(clshp.file_path, "r");
+    if (fp == NULL)
+      return 1;
+    fclose(fp);
+  }
+
 
 	int ret_code = vs_lwlibavsource_create_crlwi( NULL, NULL, NULL, NULL, NULL, &clshp);
 

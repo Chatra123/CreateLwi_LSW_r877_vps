@@ -3,9 +3,9 @@ LD = gcc
 STRIP = 
 CFLAGS = -g -O0  -ffast-math -Wall -std=c99 -pedantic -I. -I. -D__USE_MINGW_ANSI_STDIO=1 -I/usr/local/include  -m32  -fexcess-precision=fast -I/mingw32/include 
 LDFLAGS = -L. -L/usr/local/lib -L${exec_prefix}/lib  -m32 
-#STRIP = strip
-#CFLAGS = -Os -ffast-math -Wall -std=c99 -pedantic -I. -I. -D__USE_MINGW_ANSI_STDIO=1 -I/usr/local/include  -m32  -fexcess-precision=fast -I/mingw32/include 
-#LDFLAGS = -L. -L/usr/local/lib -L${exec_prefix}/lib  -m32  -shared -Wl,--dll,--add-stdcall-alias
+# STRIP = strip
+# CFLAGS = -Os -ffast-math -Wall -std=c99 -pedantic -I. -I. -D__USE_MINGW_ANSI_STDIO=1 -I/usr/local/include  -m32  -fexcess-precision=fast -I/mingw32/include 
+# LDFLAGS = -L. -L/usr/local/lib -L${exec_prefix}/lib  -m32  -shared -Wl,--dll,--add-stdcall-alias
 LIBS = -lwinmm -L/mingw32/lib -llsmash -lm -lavformat -lavicap32 -lgdi32 -lpsapi -lole32 -lstrmiids -luuid -loleaut32 -lshlwapi -lSecur32 -lopus -lm -lopenjpeg -DOPJ_STATIC -lm -lbz2 -lz -pthread -lpsapi -ladvapi32 -lshell32 -lavcodec -lavicap32 -lgdi32 -lpsapi -lole32 -lstrmiids -luuid -loleaut32 -lshlwapi -lSecur32 -lopus -lm -lopenjpeg -DOPJ_STATIC -lm -lbz2 -lz -pthread -lpsapi -ladvapi32 -lshell32 -lswresample -lm -lswscale -lm -lavutil -lm  
 SRCDIR = .
 DESTDIR = 
