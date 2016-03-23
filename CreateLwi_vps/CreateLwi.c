@@ -118,8 +118,8 @@ static lwlibav_handler_t *alloc_handler
 //    free_handler( (lwlibav_handler_t **)&instance_data );
 //}
 
-int VS_CC vs_lwlibavsource_create_crlwi( const VSMap *in, VSMap *out, void *user_data, VSCore *core, const VSAPI *vsapi,
-                                         crlwi_setting_handler__CrLwi *clshp)
+int VS_CC vs_lwlibavsource_create( const VSMap *in, VSMap *out, void *user_data, VSCore *core, const VSAPI *vsapi,
+                                   crlwi_setting_handler__CrLwi *clshp)
 {
     /* Get file path. */
 //    const char *file_path = vsapi->propGetData( in, "source", 0, NULL );
@@ -284,7 +284,7 @@ void ParseCommandLine(int argc, char** argv,
   double read_limit_MiBsec = 0.0;
 
 
-  //parser
+  //parse
   for (size_t i = 1; i < argc; i++)
   {
     //Is argv[1] filepath ?
@@ -386,8 +386,6 @@ void ParseCommandLine(int argc, char** argv,
  * lwindex.c
  *   line 3200    static void create_index__crlwi(...)
  *
- *
- *
 */
 int main(int argc, char** argv)
 {
@@ -413,7 +411,7 @@ int main(int argc, char** argv)
   }
 
 
-	int ret_code = vs_lwlibavsource_create_crlwi( NULL, NULL, NULL, NULL, NULL, &clshp);
+	int ret_code = vs_lwlibavsource_create( NULL, NULL, NULL, NULL, NULL, &clshp);
 
 	return ret_code;
 }

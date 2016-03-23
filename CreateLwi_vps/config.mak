@@ -1,7 +1,8 @@
 CC = gcc
 LD = gcc
 STRIP = 
-CFLAGS = -g -O0  -ffast-math -Wall -std=c99 -pedantic -I. -I. -D__USE_MINGW_ANSI_STDIO=1 -I/usr/local/include  -m32  -fexcess-precision=fast -I/mingw32/include 
+#      -g -O0   -Os
+CFLAGS =  -Os   -ffast-math -Wall -std=c99 -pedantic -I. -I. -D__USE_MINGW_ANSI_STDIO=1 -I/usr/local/include  -m32  -fexcess-precision=fast -I/mingw32/include 
 LDFLAGS = -L. -L/usr/local/lib -L${exec_prefix}/lib  -m32 
 # STRIP = strip
 # CFLAGS = -Os -ffast-math -Wall -std=c99 -pedantic -I. -I. -D__USE_MINGW_ANSI_STDIO=1 -I/usr/local/include  -m32  -fexcess-precision=fast -I/mingw32/include 

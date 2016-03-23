@@ -1,15 +1,22 @@
-## based on LSW r877 VapourSynth
+## based on LSW VapourSynth r877
 
 
 ### CreateLwi_vps/CreateLwi.c
 lwlibav_source.cから
   - #include
-  - vs_lwlibavsource_create(...)
+  - void vs_lwlibavsource_create(...)
   - struct lwlibav_handler_t;
   - static void free_handler(...)  
 を抽出、追加
 
-commandline処理 
+
+commandline処理を追加
+
+
+### common/lwindex.h
+  - struct crlwi_setting_handler__CrLwi;
+  - int lwlibav_construct_index__CrLwi(...)
+追加
 
 
 ### common/lwindex.c
@@ -19,10 +26,8 @@ commandline処理
 追加
 
 
-### common/lwindex.h
-  - struct crlwi_setting_handler__CrLwi;
-  - int lwlibav_construct_index__CrLwi(...)
-追加
+### config.mak
+  dll --> exe
   
 
 ### その他のファイル

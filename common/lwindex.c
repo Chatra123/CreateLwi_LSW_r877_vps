@@ -3201,10 +3201,7 @@ int lwlibav_import_av_index_entry
 //
 //  CreateLwi
 //
-//#include <time.h>
-//#include <stdio.h>
 #include <share.h>
-//#include <sys/time.h>
 
 
 static void create_index__CrLwi
@@ -3320,10 +3317,9 @@ static void create_index__CrLwi
     int64_t previous_read_pos = 0;
 
     //footer
-    char footer_path[512] = { 0 };
+    char footer_path[_MAX_PATH] = { 0 };
     sprintf(footer_path, "%s%s", clshp->lwi_path, "footer");
-    //FILE *fp_footer = clshp->create_footer ? fopen(footer_path, "wb") : NULL;             //without file share
-    FILE *fp_footer = clshp->create_footer ? _fsopen(footer_path, "wb", _SH_DENYWR) : NULL; //with    file share
+    FILE *fp_footer = clshp->create_footer ? _fsopen(footer_path, "wb", _SH_DENYWR) : NULL;
     int footer_last_refresh = clock();
     //==================================
 
@@ -3716,24 +3712,20 @@ static void create_index__CrLwi
         /*CreateLwi*/
         //
         //create footer file
-        // refresh the footer every 6 sec
-        int duration_footer_last_refresh = (double)(clock() - footer_last_refresh) / CLOCKS_PER_SEC * 1000;
+        // refresh the file every 6 sec
+        double duration_footer_last_refresh = (double)(clock() - footer_last_refresh) / CLOCKS_PER_SEC * 1000;
         if (clshp->create_footer)
           if (6 * 1000 <= duration_footer_last_refresh)
           {
-            //reopen footer file
-            if (fp_footer)
-            {
-              //freopen(footer_path, "wb", fp_footer);                  //with    file share
-              fclose(fp_footer);
-              fp_footer = _fsopen(footer_path, "wb", _SH_DENYWR);       //without file share
-            }
+            footer_last_refresh = clock();
+            //reopen
+            fp_footer = _fsopen(footer_path, "wb", _SH_DENYWR);
 
             if (fp_footer)
             {
               print_index( fp_footer, "</LibavReaderIndex>\n" );  /* CreateLwi  change fp to fp_footer */
 
-//            /* CreateLwi suspend*/
+//            /* CreateLwi off*/
 //            /* Deallocate video frame info if no active video stream. */
 //            if (vdhp->stream_index < 0)
 //              lw_freep(&video_info);
@@ -3752,7 +3744,7 @@ static void create_index__CrLwi
                       print_index( fp_footer, "<StreamDuration=%d,%d>-1</StreamDuration>\n",
                                    stream_index, stream->codec->codec_type );  /* CreateLwi  change fp to fp_footer and set duration -1  */
               }
-//            /* CreateLwi suspend*/
+//            /* CreateLwi off*/
 //            if( !strcmp( lwhp->format_name, "asf" ) )
 //            {
 //              /*....*/
@@ -3830,7 +3822,7 @@ static void create_index__CrLwi
                                               ? video_info[1].extradata_index
                                               : audio_info[1].extradata_index;
 
-                          /*CreateLwi_off    skip release list->entries*/
+                          /*CreateLwi off    skip release list->entries*/
                           /* Avoid freeing entries. */
                          //  list->entry_count = 0;
                          //  list->entries     = NULL;
@@ -3844,7 +3836,7 @@ static void create_index__CrLwi
               print_index( fp_footer, "</LibavReaderIndexFile>\n" );  /* CreateLwi  change fp to fp_footer */
 
               fflush(fp_footer);
-              footer_last_refresh = clock();
+              fclose(fp_footer);
             }// if (fp_footer)
           }// if (clshp->create_footer)
         //==================================
