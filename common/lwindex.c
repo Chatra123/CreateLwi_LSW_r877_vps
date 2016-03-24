@@ -3310,17 +3310,17 @@ static void create_index__CrLwi
 
     //==================================
     /*CreateLwi*/
-    //readlimit
+    //read limit
     double tick_read_size = 0;                                             // read size for 200 ms
     double read_limit_Bsec = clshp->read_limit_MiBsec * 1024 * 1024;
-    clock_t tick_begin_time = clock();
+    clock_t time_tick_begin = clock();
     int64_t previous_read_pos = 0;
 
     //footer
+    FILE *fp_footer;
     char footer_path[_MAX_PATH] = { 0 };
     sprintf(footer_path, "%s%s", clshp->lwi_path, "footer");
-    FILE *fp_footer = clshp->create_footer ? _fsopen(footer_path, "wb", _SH_DENYWR) : NULL;
-    int footer_last_refresh = clock();
+    int time_footer_refresh = clock();
     //==================================
 
 
@@ -3339,24 +3339,24 @@ static void create_index__CrLwi
         tick_read_size += format_ctx->pb->bytes_read - previous_read_pos;
         previous_read_pos = format_ctx->pb->bytes_read;
 
-        double duration_ms = (double)(clock() - tick_begin_time) / CLOCKS_PER_SEC * 1000;
-        if (200 <= duration_ms)
+        double elapse_ms = (double)(clock() - time_tick_begin) / CLOCKS_PER_SEC * 1000;
+        if (200 <= elapse_ms)
         {
-          tick_begin_time = clock();
+          time_tick_begin = clock();
           tick_read_size = 0;
         }
 
         if (read_limit_Bsec * (200.0 / 1000.0) < tick_read_size)
         {
-          int sleep_ms = 200 - duration_ms;
+          int sleep_ms = 200 - elapse_ms;
           const int MILLI_SEC = 1000 * 1000; //   nanosec / millisec
           const int SLEEP_MAX = 999999999;
           const int SLEEP_MIN = 0;
           int sleep_ns = sleep_ms * MILLI_SEC;
           sleep_ns = SLEEP_MIN < sleep_ns ? sleep_ns : SLEEP_MIN;
           sleep_ns = sleep_ns < SLEEP_MAX ? sleep_ns : SLEEP_MAX;
-          struct timespec req = {0, sleep_ns};
-          nanosleep(&req, NULL);
+          struct timespec span = {0, sleep_ns};
+          nanosleep(&span, NULL);
         }
       }
       //==================================
@@ -3713,11 +3713,11 @@ static void create_index__CrLwi
         //
         //create footer file
         // refresh the file every 6 sec
-        double duration_footer_last_refresh = (double)(clock() - footer_last_refresh) / CLOCKS_PER_SEC * 1000;
+        double elapse_footer_refresh = (double)(clock() - time_footer_refresh) / CLOCKS_PER_SEC * 1000;
         if (clshp->create_footer)
-          if (6 * 1000 <= duration_footer_last_refresh)
+          if (6 * 1000 <= elapse_footer_refresh)
           {
-            footer_last_refresh = clock();
+            time_footer_refresh = clock();
             //reopen
             fp_footer = _fsopen(footer_path, "wb", _SH_DENYWR);
 
