@@ -3258,8 +3258,8 @@ static void create_index__CrLwi
     //sprintf( index_path, "%s.lwi", lwhp->file_path );
     //==================================
 
-
-    FILE *index = !opt->no_create_index ? fopen( index_path, "wb" ) : NULL;
+    FILE *index = !opt->no_create_index ? _fsopen(index_path, "wb", _SH_DENYWR) : NULL;  /*CreateLwi*/
+    //FILE *index = !opt->no_create_index ? fopen( index_path, "wb" ) : NULL;              /*CreateLwi_off*/
     if( !index && !opt->no_create_index )
     {
         free( video_info );
